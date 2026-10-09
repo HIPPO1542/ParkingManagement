@@ -1,0 +1,33 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Parking - Hệ Thống Quản Lý Bãi Xe Thông Minh</title>
+    <script>
+        try {
+            const saved = localStorage.getItem('currentUser');
+            const user = saved ? JSON.parse(saved) : null;
+            if (user && user.token) {
+                if (user.role === 'QuanLy') {
+                    window.location.replace("html/dashboard.html");
+                } else {
+                    window.location.replace("html/checkin.html");
+                }
+            } else {
+                // Khách vãng lai: chuyển đến xem danh sách bãi xe công khai
+                window.location.replace("html/parking-lots.html");
+            }
+        } catch (e) {
+            window.location.replace("html/parking-lots.html");
+        }
+    </script>
+</head>
+<body style="font-family: system-ui, -apple-system, sans-serif; background-color: #0f172a; color: #ffffff; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0;">
+    <div style="text-align: center;">
+        <h2 style="font-weight: 700;">HỆ THỐNG QUẢN LÝ BÃI XE THÔNG MINH</h2>
+        <p style="opacity: 0.8;">Đang chuyển hướng đến hệ thống...</p>
+        <p><a href="html/parking-lots.html" style="color: #38bdf8; text-decoration: underline;">Bấm vào đây nếu trình duyệt không tự chuyển</a></p>
+    </div>
+</body>
+</html>

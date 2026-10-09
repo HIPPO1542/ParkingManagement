@@ -1,0 +1,750 @@
+{
+	"info": {
+		"_postman_id": "b1a2c3d4-e5f6-7890-abcd-ef1234567890",
+		"name": "ParkingManagement API",
+		"description": "Tài liệu API hoàn chỉnh và kịch bản chạy thử (Demo) cho Hệ thống Quản lý Bãi đỗ xe thông minh (Parking Management System).\n\nKiến trúc: Clean Architecture + DDD (.NET 8 Web API)\nCổng mặc định: http://localhost:5097\n\nHướng dẫn sử dụng:\n1. Chạy API '1.1 Login (Admin)' hoặc '1.2 Login (Operator)' trước -> Token sẽ tự động được lưu vào biến {{token}}.\n2. Tất cả các API khác sẽ tự động sử dụng Token này để xác thực.\n3. Khi chạy '3.1 Check-in', mã phiên gửi xe (sessionId) sẽ được tự động lưu vào biến {{sessionId}} để dùng cho API Check-out.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5097",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "parkingLotId",
+			"value": "33333333-3333-3333-3333-333333333333",
+			"type": "string"
+		},
+		{
+			"key": "operatorId",
+			"value": "22222222-2222-2222-2222-222222222222",
+			"type": "string"
+		},
+		{
+			"key": "vehicleTypeMotorbikeId",
+			"value": "66666666-6666-6666-6666-666666666666",
+			"type": "string"
+		},
+		{
+			"key": "vehicleTypeCarId",
+			"value": "77777777-7777-7777-7777-777777777777",
+			"type": "string"
+		},
+		{
+			"key": "sessionId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "lotIdToDelete",
+			"value": "55555555-5555-5555-5555-555555555555",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Authentication (Xác thực & Phân quyền)",
+			"description": "Các API liên quan đến đăng nhập hệ thống và thông tin người dùng đang đăng nhập.",
+			"item": [
+				{
+					"name": "1.1 Login (Quản trị viên - Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var res = pm.response.json();",
+									"    if (res.token) {",
+									"        pm.collectionVariables.set('token', res.token);",
+									"        console.log('✅ Admin Token đã được tự động lưu vào biến {{token}}');",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin@123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Đăng nhập với tài khoản Quản trị viên (Admin). Sau khi chạy, Postman sẽ tự động lưu JWT Token vào biến `{{token}}`."
+					},
+					"response": []
+				},
+				{
+					"name": "1.2 Login (Chủ bãi xe - Business Operator)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var res = pm.response.json();",
+									"    if (res.token) {",
+									"        pm.collectionVariables.set('token', res.token);",
+									"        console.log('✅ Operator Token đã được tự động lưu vào biến {{token}}');",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"sgparking\",\n  \"password\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Đăng nhập với tài khoản Đơn vị vận hành bãi xe (Operator). Token tự động lưu vào `{{token}}`."
+					},
+					"response": []
+				},
+				{
+					"name": "1.3 Get Current User Profile (Me)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"me"
+							]
+						},
+						"description": "Lấy thông tin người dùng hiện tại dựa trên Bearer Token đã đăng nhập."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Parking Lots (Quản lý Bãi đỗ xe)",
+			"description": "Các API quản lý danh sách, chi tiết và thông tin sức chứa các bãi xe.",
+			"item": [
+				{
+					"name": "2.1 Lấy danh sách bãi xe (Phân trang)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/parking-lots?page=1&pageSize=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"parking-lots"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								},
+								{
+									"key": "isActive",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "operatorId",
+									"value": "{{operatorId}}",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Lấy danh sách các bãi đỗ xe với hỗ trợ lọc trạng thái, chủ sở hữu và phân trang."
+					},
+					"response": []
+				},
+				{
+					"name": "2.2 Lấy chi tiết bãi xe theo ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/parking-lots/{{parkingLotId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"parking-lots",
+								"{{parkingLotId}}"
+							]
+						},
+						"description": "Lấy chi tiết bãi xe (tên, sức chứa tổng, chỗ còn trống, giờ mở/đóng cửa, bảng giá đi kèm)."
+					},
+					"response": []
+				},
+				{
+					"name": "2.3 Thêm mới bãi xe",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201 || pm.response.code === 200) {",
+									"    var res = pm.response.json();",
+									"    if (res.data && res.data.id) {",
+									"        pm.collectionVariables.set('lotIdToDelete', res.data.id);",
+									"        console.log('✅ Bãi xe mới tạo có ID đã lưu vào {{lotIdToDelete}}:', res.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"businessOperatorId\": \"{{operatorId}}\",\n  \"name\": \"Bãi Xe Khu Công Nghệ Cao\",\n  \"address\": {\n    \"street\": \"Đường D1, Khu CNC\",\n    \"ward\": \"Phường Tăng Nhơn Phú B\",\n    \"district\": \"Thành phố Thủ Đức\",\n    \"city\": \"Thành phố Hồ Chí Minh\"\n  },\n  \"totalCapacity\": 120,\n  \"openTime\": \"06:00\",\n  \"closeTime\": \"22:00\",\n  \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/parking-lots",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"parking-lots"
+							]
+						},
+						"description": "Thêm mới một bãi đỗ xe vào hệ thống. Tự động lưu ID bãi mới vào biến {{lotIdToDelete}} để qua API 2.5 test Xóa."
+					},
+					"response": []
+				},
+				{
+					"name": "2.4 Cập nhật thông tin bãi xe",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Ben Thanh Central Parking Lot (Cập nhật)\",\n  \"address\": {\n    \"street\": \"01 Lam Son Square\",\n    \"ward\": \"Ben Nghe Ward\",\n    \"district\": \"District 1\",\n    \"city\": \"Ho Chi Minh City\"\n  },\n  \"totalCapacity\": 150,\n  \"openTime\": \"05:30\",\n  \"closeTime\": \"23:30\",\n  \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/parking-lots/{{parkingLotId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"parking-lots",
+								"{{parkingLotId}}"
+							]
+						},
+						"description": "Cập nhật tên, địa chỉ, sức chứa và giờ hoạt động của bãi xe."
+					},
+					"response": []
+				},
+				{
+					"name": "2.5 Xóa bãi xe",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/parking-lots/{{lotIdToDelete}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"parking-lots",
+								"{{lotIdToDelete}}"
+							]
+						},
+						"description": "Xóa bãi xe khỏi hệ thống (mặc định xóa bãi Bình Triệu chưa có xe nào hoặc bãi vừa tạo ở 2.3)."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Parking Sessions (Quầy Vé - Check-in / Check-out)",
+			"description": "Các nghiệp vụ vào bãi (Check-in), ra bãi tính tiền (Check-out) và tra cứu lịch sử gửi xe.",
+			"item": [
+				{
+					"name": "3.1 Check-in Xe máy vào bãi",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201 || pm.response.code === 200) {",
+									"    var res = pm.response.json();",
+									"    if (res.data && res.data.id) {",
+									"        pm.collectionVariables.set('sessionId', res.data.id);",
+									"        console.log('✅ Check-in thành công. SessionId đã lưu vào {{sessionId}}:', res.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"parkingLotId\": \"{{parkingLotId}}\",\n  \"vehicleTypeId\": \"{{vehicleTypeMotorbikeId}}\",\n  \"provinceCode\": \"59\",\n  \"plateNumber\": \"K1-99999\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/parking-sessions/check-in",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"parking-sessions",
+								"check-in"
+							]
+						},
+						"description": "Ghi nhận xe máy vào bãi. Giảm 1 chỗ trống (AvailableSpots) của bãi xe. Tự động lưu `sessionId` vào biến để lát nữa test Check-out."
+					},
+					"response": []
+				},
+				{
+					"name": "3.2 Check-in Ô tô vào bãi",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"parkingLotId\": \"{{parkingLotId}}\",\n  \"vehicleTypeId\": \"{{vehicleTypeCarId}}\",\n  \"provinceCode\": \"51\",\n  \"plateNumber\": \"A-88888\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/parking-sessions/check-in",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"parking-sessions",
+								"check-in"
+							]
+						},
+						"description": "Ghi nhận ô tô vào bãi xe."
+					},
+					"response": []
+				},
+				{
+					"name": "3.3 Check-out theo Biển số xe",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"parkingLotId\": \"{{parkingLotId}}\",\n  \"provinceCode\": \"59\",\n  \"plateNumber\": \"K1-99999\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/parking-sessions/check-out",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"parking-sessions",
+								"check-out"
+							]
+						},
+						"description": "Cho xe ra bãi dựa vào biển số: tính tiền tự động theo bảng giá Tariff và cộng lại 1 chỗ trống cho bãi xe."
+					},
+					"response": []
+				},
+				{
+					"name": "3.4 Check-out theo Session ID",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/parking-sessions/{{sessionId}}/check-out",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"parking-sessions",
+								"{{sessionId}}",
+								"check-out"
+							]
+						},
+						"description": "Check-out cho xe ra dựa trên mã định danh SessionId (lấy từ biến {{sessionId}} sau khi chạy Check-in)."
+					},
+					"response": []
+				},
+				{
+					"name": "3.5 Lấy chi tiết phiên gửi xe theo ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/parking-sessions/{{sessionId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"parking-sessions",
+								"{{sessionId}}"
+							]
+						},
+						"description": "Tra cứu chi tiết một phiên gửi xe (thời gian vào, ra, biển số, trạng thái, số tiền phí)."
+					},
+					"response": []
+				},
+				{
+					"name": "3.6 Lấy danh sách các phiên gửi xe (Lịch sử vào/ra)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/parking-sessions?page=1&pageSize=20",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"parking-sessions"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "20"
+								},
+								{
+									"key": "parkingLotId",
+									"value": "{{parkingLotId}}",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "Active",
+									"description": "Active hoặc Completed",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Lấy danh sách các phiên đỗ xe có hỗ trợ lọc theo bãi xe và trạng thái đang đỗ (Active) hoặc đã hoàn tất (Completed)."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Tariffs (Bảng Giá Dịch Vụ)",
+			"description": "Quản lý đơn giá giữ xe theo lượt hoặc theo giờ cho từng loại phương tiện tại mỗi bãi xe.",
+			"item": [
+				{
+					"name": "4.1 Lấy toàn bộ bảng giá",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tariffs",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"tariffs"
+							]
+						},
+						"description": "Lấy danh sách tất cả các bảng giá trong toàn bộ hệ thống."
+					},
+					"response": []
+				},
+				{
+					"name": "4.2 Lấy bảng giá của một bãi xe cụ thể",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tariffs/parking-lot/{{parkingLotId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"tariffs",
+								"parking-lot",
+								"{{parkingLotId}}"
+							]
+						},
+						"description": "Xem tất cả mức giá áp dụng tại bãi đỗ xe đã chọn."
+					},
+					"response": []
+				},
+				{
+					"name": "4.3 Tạo bảng giá mới",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"parkingLotId\": \"{{parkingLotId}}\",\n  \"vehicleTypeId\": \"{{vehicleTypeMotorbikeId}}\",\n  \"price\": {\n    \"amount\": 7000,\n    \"currency\": \"VND\"\n  },\n  \"pricingType\": 1,\n  \"effectiveDate\": \"2026-10-01T00:00:00Z\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/tariffs",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"tariffs"
+							]
+						},
+						"description": "Tạo bảng giá mới (pricingType: 0 là PerTurn / theo lượt, 1 là PerHour / theo giờ)."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "5. Vehicle Types (Loại Phương Tiện)",
+			"description": "Danh mục các loại phương tiện được hỗ trợ trong hệ thống (Xe máy, Ô tô, Xe tải...).",
+			"item": [
+				{
+					"name": "5.1 Lấy danh sách loại phương tiện",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/vehicle-types",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"vehicle-types"
+							]
+						},
+						"description": "Lấy danh mục các loại xe hiện có trong hệ thống."
+					},
+					"response": []
+				},
+				{
+					"name": "5.2 Thêm mới loại phương tiện",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Xe Điện (Electric Car)\",\n  \"description\": \"Ô tô chạy bằng động cơ điện 4-7 chỗ\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/vehicle-types",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"vehicle-types"
+							]
+						},
+						"description": "Tạo thêm một loại phương tiện mới."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "6. Business Operators (Chủ Bãi / Đơn vị Vận hành)",
+			"description": "Quản lý danh sách các công ty/đơn vị sở hữu bãi đỗ xe.",
+			"item": [
+				{
+					"name": "6.1 Lấy danh sách đơn vị vận hành",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/business-operators",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"business-operators"
+							]
+						},
+						"description": "Lấy danh sách các đơn vị kinh doanh vận hành bãi xe."
+					},
+					"response": []
+				},
+				{
+					"name": "6.2 Lấy chi tiết đơn vị vận hành theo ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/business-operators/{{operatorId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"business-operators",
+								"{{operatorId}}"
+							]
+						},
+						"description": "Lấy chi tiết đơn vị vận hành kèm danh sách các bãi xe mà họ quản lý."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "7. Reports (Báo Cáo & Thống Kê)",
+			"description": "Báo cáo doanh thu, lượt đỗ xe và tỉ lệ lấp đầy bãi xe theo mốc thời gian.",
+			"item": [
+				{
+					"name": "7.1 Báo cáo hoạt động bãi xe",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/reports/activity?parkingLotId={{parkingLotId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"reports",
+								"activity"
+							],
+							"query": [
+								{
+									"key": "parkingLotId",
+									"value": "{{parkingLotId}}"
+								},
+								{
+									"key": "fromDate",
+									"value": "2026-10-01T00:00:00Z",
+									"disabled": true
+								},
+								{
+									"key": "toDate",
+									"value": "2026-10-31T23:59:59Z",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Báo cáo doanh thu thu được, tổng lượt xe vào/ra và các lượt xe đang gửi tại bãi xe theo khoảng thời gian."
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

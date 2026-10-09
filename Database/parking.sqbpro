@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="parking.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="1"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="4047"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><table title="LUOT_RA_VAO" custom_title="0" dock_id="2" table="4,11:mainLUOT_RA_VAO"/><dock_state state="000000ff00000000fd0000000100000002000005f4000002aefc0100000002fb000000160064006f0063006b00420072006f00770073006500310100000000ffffffff0000000000000000fb000000160064006f0063006b00420072006f00770073006500320100000000000005f40000012400ffffff0000025b0000000000000004000000040000000800000008fc00000000"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="BAI_DO_XE" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_" freeze_columns="0"><sort/><column_widths><column index="1" value="288"/><column index="2" value="288"/><column index="3" value="300"/><column index="4" value="179"/><column index="5" value="179"/><column index="6" value="124"/><column index="7" value="124"/><column index="8" value="93"/><column index="9" value="85"/><column index="10" value="76"/><column index="11" value="87"/><column index="12" value="103"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="DON_VI_KINH_DOANH" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_" freeze_columns="0"><sort/><column_widths><column index="1" value="288"/><column index="2" value="288"/><column index="3" value="280"/><column index="4" value="140"/><column index="5" value="132"/><column index="6" value="124"/><column index="7" value="124"/><column index="8" value="124"/><column index="9" value="93"/><column index="10" value="156"/><column index="11" value="133"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="GIA_VE_BAI_XE" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_" freeze_columns="0"><sort/><column_widths><column index="1" value="288"/><column index="2" value="288"/><column index="3" value="288"/><column index="4" value="62"/><column index="5" value="74"/><column index="6" value="93"/><column index="7" value="218"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="LOAI_XE" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_" freeze_columns="0"><sort/><column_widths><column index="1" value="288"/><column index="2" value="163"/><column index="3" value="296"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="LUOT_RA_VAO" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_" freeze_columns="0"><sort/><column_widths><column index="1" value="288"/><column index="2" value="288"/><column index="3" value="288"/><column index="4" value="105"/><column index="5" value="72"/><column index="6" value="218"/><column index="7" value="218"/><column index="8" value="75"/><column index="9" value="74"/><column index="10" value="70"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="NHAN_VIEN_QUAN_LY" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_" freeze_columns="0"><sort/><column_widths><column index="1" value="288"/><column index="2" value="156"/><column index="3" value="140"/><column index="4" value="87"/><column index="5" value="132"/><column index="6" value="96"/><column index="7" value="98"/><column index="8" value="133"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="SQL 1*">-- ====================================================================
+-- 1. THÊM 10 BÃI ĐỖ XE ĐANG HOẠT ĐỘNG TẠI CÁC ĐỊA ĐIỂM TRỌNG ĐIỂM
+-- ====================================================================
+
+-- Bãi 1: Vincom Center Đồng Khởi (Quận 1) - Sức chứa: 300
+INSERT OR REPLACE INTO &quot;BAI_DO_XE&quot; VALUES (
+    'b0100000-0000-0000-0000-000000000001', '22222222-2222-2222-2222-222222222222',
+    'Bãi Đỗ Xe TTTM Vincom Center Đồng Khởi', '72 Lê Thánh Tôn', 'Phường Bến Nghé', 'Quận 1', 'TP. Hồ Chí Minh',
+    300, 297, '08:00', '22:30', 1
+);
+
+-- Bãi 2: Tòa nhà Bitexco Financial Tower (Quận 1) - Sức chứa: 250
+INSERT OR REPLACE INTO &quot;BAI_DO_XE&quot; VALUES (
+    'b0200000-0000-0000-0000-000000000002', '22222222-2222-2222-2222-222222222222',
+    'Bãi Đỗ Xe Tòa Nhà Bitexco Financial Tower', '02 Hải Triều', 'Phường Bến Nghé', 'Quận 1', 'TP. Hồ Chí Minh',
+    250, 248, '06:00', '23:00', 1
+);
+
+-- Bãi 3: Chợ Bến Thành &amp; Ga Metro (Quận 1) - Sức chứa: 200
+INSERT OR REPLACE INTO &quot;BAI_DO_XE&quot; VALUES (
+    'b0300000-0000-0000-0000-000000000003', '22222222-2222-2222-2222-222222222222',
+    'Bãi Đỗ Xe Quảng Trường Chợ Bến Thành', 'Đường Lê Lai', 'Phường Bến Thành', 'Quận 1', 'TP. Hồ Chí Minh',
+    200, 197, '05:00', '23:59', 1
+);
+
+-- Bãi 4: Thảo Cầm Viên Sài Gòn (Quận 1) - Sức chứa: 180
+INSERT OR REPLACE INTO &quot;BAI_DO_XE&quot; VALUES (
+    'b0400000-0000-0000-0000-000000000004', '22222222-2222-2222-2222-222222222222',
+    'Bãi Đỗ Xe Công Viên Thảo Cầm Viên', '02 Nguyễn Bỉnh Khiêm', 'Phường Bến Nghé', 'Quận 1', 'TP. Hồ Chí Minh',
+    180, 178, '07:00', '18:30', 1
+);
+
+-- Bãi 5: Sân Bay Tân Sơn Nhất Ga T1-T2 (Tân Bình) - Sức chứa: 500
+INSERT OR REPLACE INTO &quot;BAI_DO_XE&quot; VALUES (
+    'b0500000-0000-0000-0000-000000000005', '22222222-2222-2222-2222-222222222222',
+    'Bãi Đỗ Xe Nhà Ga T1-T2 Sân Bay Tân Sơn Nhất', 'Đường Trường Sơn', 'Phường 2', 'Quận Tân Bình', 'TP. Hồ Chí Minh',
+    500, 497, '00:00', '23:59', 1
+);
+
+-- Bãi 6: Ga Đường Sắt Sài Gòn (Quận 3) - Sức chứa: 150
+INSERT OR REPLACE INTO &quot;BAI_DO_XE&quot; VALUES (
+    'b0600000-0000-0000-0000-000000000006', '22222222-2222-2222-2222-222222222222',
+    'Bãi Đỗ Xe Ga Đường Sắt Sài Gòn', '01 Nguyễn Thông', 'Phường 9', 'Quận 3', 'TP. Hồ Chí Minh',
+    150, 148, '04:30', '23:00', 1
+);
+
+-- Bãi 7: Vạn Hạnh Mall (Quận 10) - Sức chứa: 350
+INSERT OR REPLACE INTO &quot;BAI_DO_XE&quot; VALUES (
+    'b0700000-0000-0000-0000-000000000007', '22222222-2222-2222-2222-222222222222',
+    'Bãi Đỗ Xe TTTM Vạn Hạnh Mall', '11 Sư Vạn Hạnh', 'Phường 12', 'Quận 10', 'TP. Hồ Chí Minh',
+    350, 347, '08:30', '22:00', 1
+);
+
+-- Bãi 8: Crescent Mall Phú Mỹ Hưng (Quận 7) - Sức chứa: 400
+INSERT OR REPLACE INTO &quot;BAI_DO_XE&quot; VALUES (
+    'b0800000-0000-0000-0000-000000000008', '22222222-2222-2222-2222-222222222222',
+    'Bãi Đỗ Xe Crescent Mall Phú Mỹ Hưng', '101 Tôn Dật Tiên', 'Phường Tân Phú', 'Quận 7', 'TP. Hồ Chí Minh',
+    400, 398, '08:00', '22:30', 1
+);
+
+-- Bãi 9: AEON Mall Bình Tân (Bình Tân) - Sức chứa: 450
+INSERT OR REPLACE INTO &quot;BAI_DO_XE&quot; VALUES (
+    'b0900000-0000-0000-0000-000000000009', '22222222-2222-2222-2222-222222222222',
+    'Bãi Đỗ Xe Đại Siêu Thị AEON Mall Bình Tân', '01 Đường Số 17A', 'Phường Bình Trị Đông B', 'Quận Bình Tân', 'TP. Hồ Chí Minh',
+    450, 447, '08:00', '22:00', 1
+);
+
+-- Bãi 10: Bến Xe Miền Đông Mới (TP. Thủ Đức) - Sức chứa: 300
+INSERT OR REPLACE INTO &quot;BAI_DO_XE&quot; VALUES (
+    'b1000000-0000-0000-0000-000000000010', '22222222-2222-2222-2222-222222222222',
+    'Bãi Đỗ Xe Khách Bến Xe Miền Đông Mới', '501 Hoàng Hữu Nam', 'Phường Long Bình', 'TP. Thủ Đức', 'TP. Hồ Chí Minh',
+    300, 298, '00:00', '23:59', 1
+);
+
+-- ====================================================================
+-- 2. THIẾT LẬP BẢNG GIÁ DỊCH VỤ CHO CẢ 10 BÃI ĐỖ XE
+-- ====================================================================
+INSERT OR REPLACE INTO &quot;GIA_VE_BAI_XE&quot; VALUES 
+('gv-01-may', 'b0100000-0000-0000-0000-000000000001', '66666666-6666-6666-6666-666666666666', '5000', 'VND', 'Luot', '2026-08-01 00:00:00'),
+('gv-01-oto', 'b0100000-0000-0000-0000-000000000001', '77777777-7777-7777-7777-777777777777', '25000', 'VND', 'Gio', '2026-08-01 00:00:00'),
+('gv-02-may', 'b0200000-0000-0000-0000-000000000002', '66666666-6666-6666-6666-666666666666', '6000', 'VND', 'Luot', '2026-08-01 00:00:00'),
+('gv-02-oto', 'b0200000-0000-0000-0000-000000000002', '77777777-7777-7777-7777-777777777777', '30000', 'VND', 'Gio', '2026-08-01 00:00:00'),
+('gv-05-may', 'b0500000-0000-0000-0000-000000000005', '66666666-6666-6666-6666-666666666666', '10000', 'VND', 'Luot', '2026-08-01 00:00:00'),
+('gv-05-oto', 'b0500000-0000-0000-0000-000000000005', '77777777-7777-7777-7777-777777777777', '35000', 'VND', 'Gio', '2026-08-01 00:00:00');
+
+-- ====================================================================
+-- 3. CÁC LƯỢT XE MẪU TRONG THÁNG 9/2026 &amp; THÁNG 10/2026
+-- ====================================================================
+
+-- [THÁNG 9/2026] - Tuần 1: Ngày 02/09/2026
+INSERT OR REPLACE INTO &quot;LUOT_RA_VAO&quot; VALUES 
+('luot-09-001', 'b0100000-0000-0000-0000-000000000001', '66666666-6666-6666-6666-666666666666', '59', 'T1-12345', '2026-09-02 08:30:00', '2026-09-02 11:45:00', '5000', 'VND', 'Da_ra'),
+('luot-09-002', 'b0100000-0000-0000-0000-000000000001', '77777777-7777-7777-7777-777777777777', '51', 'K-11111', '2026-09-02 09:15:00', '2026-09-02 13:15:00', '100000', 'VND', 'Da_ra');
+
+-- [THÁNG 9/2026] - Tuần 2: Ngày 09/09/2026
+INSERT OR REPLACE INTO &quot;LUOT_RA_VAO&quot; VALUES 
+('luot-09-003', 'b0200000-0000-0000-0000-000000000002', '66666666-6666-6666-6666-666666666666', '59', 'K2-98765', '2026-09-09 08:30:00', '2026-09-09 12:00:00', '6000', 'VND', 'Da_ra'),
+('luot-09-004', 'b0200000-0000-0000-0000-000000000002', '77777777-7777-7777-7777-777777777777', '51', 'F-22222', '2026-09-09 10:00:00', '2026-09-09 14:00:00', '120000', 'VND', 'Da_ra');
+
+-- [THÁNG 9/2026] - Tuần 3: Ngày 16/09/2026
+INSERT OR REPLACE INTO &quot;LUOT_RA_VAO&quot; VALUES 
+('luot-09-005', 'b0300000-0000-0000-0000-000000000003', '66666666-6666-6666-6666-666666666666', '51', 'A3-45678', '2026-09-16 07:45:00', '2026-09-16 10:30:00', '5000', 'VND', 'Da_ra'),
+('luot-09-006', 'b0500000-0000-0000-0000-000000000005', '77777777-7777-7777-7777-777777777777', '60', 'A-44444', '2026-09-16 06:00:00', '2026-09-16 18:00:00', '420000', 'VND', 'Da_ra');
+
+-- [THÁNG 9/2026] - Tuần 4: Ngày 24/09/2026
+INSERT OR REPLACE INTO &quot;LUOT_RA_VAO&quot; VALUES 
+('luot-09-007', 'b0700000-0000-0000-0000-000000000007', '66666666-6666-6666-6666-666666666666', '59', 'X1-77889', '2026-09-24 18:00:00', '2026-09-24 21:30:00', '5000', 'VND', 'Da_ra'),
+('luot-09-008', 'b0800000-0000-0000-0000-000000000008', '77777777-7777-7777-7777-777777777777', '51', 'C-66666', '2026-09-24 11:30:00', '2026-09-24 14:30:00', '75000', 'VND', 'Da_ra');
+
+-- [THÁNG 10/2026] - Ngày 01/10 đến 04/10/2026
+INSERT OR REPLACE INTO &quot;LUOT_RA_VAO&quot; VALUES 
+('luot-10-001', 'b0100000-0000-0000-0000-000000000001', '66666666-6666-6666-6666-666666666666', '59', 'Y2-99001', '2026-10-01 14:00:00', '2026-10-01 17:30:00', '5000', 'VND', 'Da_ra'),
+('luot-10-002', 'b0100000-0000-0000-0000-000000000001', '77777777-7777-7777-7777-777777777777', '51', 'D-77777', '2026-10-02 10:00:00', '2026-10-02 12:00:00', '50000', 'VND', 'Da_ra'),
+('luot-10-003', 'b0500000-0000-0000-0000-000000000005', '77777777-7777-7777-7777-777777777777', '51', 'G-99999', '2026-10-03 08:00:00', '2026-10-03 16:00:00', '280000', 'VND', 'Da_ra');
+
+-- [HÔM NAY - 05/10/2026] - CÁC XE ĐANG GỬI TRONG BÃI (Trạng thái: Dang_gui)
+INSERT OR REPLACE INTO &quot;LUOT_RA_VAO&quot; VALUES 
+('luot-now-01', 'b0100000-0000-0000-0000-000000000001', '66666666-6666-6666-6666-666666666666', '59', 'T1-12345', '2026-10-05 07:15:00', NULL, '0', 'VND', 'Dang_gui'),
+('luot-now-02', 'b0100000-0000-0000-0000-000000000001', '77777777-7777-7777-7777-777777777777', '51', 'K-11111', '2026-10-05 08:30:00', NULL, '0', 'VND', 'Dang_gui'),
+('luot-now-03', 'b0100000-0000-0000-0000-000000000001', '66666666-6666-6666-6666-666666666666', '50', 'B4-11223', '2026-10-05 09:00:00', NULL, '0', 'VND', 'Dang_gui'),
+('luot-now-04', 'b0500000-0000-0000-0000-000000000005', '77777777-7777-7777-7777-777777777777', '51', 'LD-12345', '2026-10-05 06:30:00', NULL, '0', 'VND', 'Dang_gui');</sql><current_tab id="0"/></tab_sql></sqlb_project>

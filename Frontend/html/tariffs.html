@@ -1,0 +1,318 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dịch Vụ & Bảng Giá - Smart Parking</title>
+    
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5.3.3 CSS Online CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6.5.2 Online CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+    <!-- 1. NAVIGATION BAR -->
+    <nav class="navbar navbar-expand-lg app-navbar sticky-top">
+        <div class="container-fluid px-4 py-1">
+            <a class="navbar-brand d-flex align-items-center gap-3 text-white text-decoration-none" href="dashboard.html">
+                <div class="brand-logo-icon">
+                    <i class="fa-solid fa-square-parking fs-4"></i>
+                </div>
+                <div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="fw-bold tracking-wide fs-5">SMART PARKING</span>
+                        <span class="badge bg-warning text-dark px-2 py-0.5 rounded-pill fw-bold" style="font-size: 10px;">PRO</span>
+                    </div>
+                    <span class="d-block text-white opacity-75 small" style="font-size: 11px;">Hệ Thống Quản Lý Bãi Đỗ Xe Thông Minh</span>
+                </div>
+            </a>
+
+            <!-- Right Controls: API Server & User Profile -->
+            <div class="d-flex align-items-center gap-3 ms-auto">
+                <div class="d-none d-lg-flex align-items-center text-white small bg-white bg-opacity-10 px-3 py-1.5 rounded-pill border border-white border-opacity-10">
+                    <span class="me-2 opacity-75"><i class="fa-solid fa-server me-1"></i> API:</span>
+                    <input type="text" id="apiUrlInput" class="form-control form-control-sm text-center bg-transparent text-white border-0 p-0 fw-semibold" style="width: 170px;" value="http://localhost:5097">
+                </div>
+
+                <!-- User Profile Display when Logged In -->
+                <div id="navUserInfo" class="d-none align-items-center text-white gap-2">
+                    <div class="user-profile-chip d-flex align-items-center">
+                        <i id="userRoleIcon" class="fa-solid fa-user-shield me-2 text-warning fs-5"></i>
+                        <div>
+                            <div class="fw-bold lh-1" id="navUserFullName" style="font-size: 0.875rem;">Admin</div>
+                            <small class="opacity-75" style="font-size: 11px;" id="navUserRole">Quản Lý</small>
+                        </div>
+                    </div>
+                    <button class="btn btn-sm btn-outline-light rounded-pill px-3" onclick="handleLogout()" title="Đăng xuất">
+                        <i class="fa-solid fa-right-from-bracket me-1"></i> Thoát
+                    </button>
+                </div>
+
+                <!-- Login Button when Not Logged In -->
+                <div id="navLoginBtn">
+                    <a href="login.html" class="btn btn-sm btn-warning fw-bold text-dark rounded-pill px-3 py-1.5 shadow-sm text-decoration-none">
+                        <i class="fa-solid fa-right-to-bracket me-1"></i> Đăng Nhập
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 2. MAIN CONTAINER -->
+    <div class="container-fluid px-4 py-4">
+
+        <!-- Banner Thông Báo Phân Quyền & Chuyển Vai Trò Nhanh -->
+        <div id="roleAlertBanner" class="role-banner-card d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle p-2 bg-primary bg-opacity-10 text-primary">
+                    <i id="bannerRoleIcon" class="fa-solid fa-circle-info fs-3"></i>
+                </div>
+                <div>
+                    <h6 id="bannerRoleTitle" class="fw-bold mb-1 text-dark">Chế độ xem: Khách vãng lai</h6>
+                    <div id="bannerRoleDesc" class="small text-muted">Vui lòng đăng nhập với tài khoản Quản lý hoặc Đơn vị kinh doanh để thao tác đúng nghiệp vụ phân quyền.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thông báo lỗi/thành công nổi -->
+        <div id="alertBox" class="alert floating-alert d-none alert-dismissible fade show shadow-lg" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="fa-solid fa-bell me-2 fs-5"></i>
+                <span id="alertMessage" class="fw-semibold"></span>
+            </div>
+            <button type="button" class="btn-close" onclick="closeAlert()"></button>
+        </div>
+
+        <!-- MENU ĐIỀU HƯỚNG CÁC TRANG MÀN HÌNH -->
+        <div class="mb-4">
+            <div class="custom-nav-pills shadow-sm">
+                <a href="dashboard.html" class="nav-link" id="navItem-dashboard">
+                    <i class="fa-solid fa-chart-pie"></i> Báo Cáo & Thống Kê
+                </a>
+                <a href="checkin.html" class="nav-link" id="navItem-checkin">
+                    <i class="fa-solid fa-right-left"></i> Check-in / Check-out Xe
+                </a>
+                <a href="parking-lots.html" class="nav-link" id="navItem-baixe">
+                    <i class="fa-solid fa-warehouse"></i> <span id="labelNavBaiXe">Quản Lý Bãi Đỗ Xe</span>
+                </a>
+                <a href="business-operators.html" class="nav-link" id="navItem-donvi">
+                    <i class="fa-solid fa-building"></i> Đơn Vị Kinh Doanh
+                </a>
+                <a href="tariffs.html" class="nav-link active" id="navItem-banggia">
+                    <i class="fa-solid fa-tags"></i> Dịch Vụ & Bảng Giá
+                </a>
+            </div>
+        </div>
+
+        <!-- NỘI DUNG MÀN HÌNH 5: QUẢN LÝ DỊCH VỤ & BẢNG GIÁ -->
+        <div class="app-card p-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <div>
+                    <h5 class="fw-bold text-primary mb-0 d-flex align-items-center">
+                        <i class="fa-solid fa-tags me-2"></i>Bảng Giá Vé & Dịch Vụ Gửi Xe
+                    </h5>
+                    <small class="text-muted">Thiết lập biểu phí dịch vụ cho từng loại phương tiện tại các bãi đỗ</small>
+                </div>
+                <div>
+                    <button class="btn btn-success rounded-pill px-4 fw-semibold shadow-sm" onclick="openAddBangGiaModal()">
+                        <i class="fa-solid fa-plus me-1"></i> Thiết Lập Biểu Phí Mới
+                    </button>
+                </div>
+            </div>
+
+            <!-- THANH BỘ LỌC TÌM KIẾM ĐA TIÊU CHÍ BẢNG GIÁ DỊCH VỤ -->
+            <div class="bg-light p-3 rounded-3 border mb-3">
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold text-secondary mb-1">
+                            <i class="fa-solid fa-warehouse me-1"></i> Tên Bãi Đỗ Xe
+                        </label>
+                        <select id="filterBgBaiXe" class="form-select form-select-sm shadow-sm" onchange="filterBangGias()">
+                            <option value="">-- Tất cả bãi đỗ --</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label small fw-semibold text-secondary mb-1">
+                            <i class="fa-solid fa-car me-1"></i> Loại Xe Áp Dụng
+                        </label>
+                        <select id="filterBgLoaiXe" class="form-select form-select-sm shadow-sm" onchange="filterBangGias()">
+                            <option value="">-- Tất cả loại xe --</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label small fw-semibold text-secondary mb-1">
+                            <i class="fa-solid fa-money-bill-wave me-1"></i> Mức Giá Tối Đa
+                        </label>
+                        <input type="number" id="filterBgMucGia" class="form-control form-control-sm shadow-sm" placeholder="VD: 50000" oninput="filterBangGias()">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label small fw-semibold text-secondary mb-1">
+                            <i class="fa-solid fa-clock me-1"></i> Hình Thức Tính
+                        </label>
+                        <select id="filterBgHinhThuc" class="form-select form-select-sm shadow-sm" onchange="filterBangGias()">
+                            <option value="">-- Tất cả hình thức --</option>
+                            <option value="Luot">Theo Lượt</option>
+                            <option value="Gio">Theo Giờ</option>
+                            <option value="Ngay">Theo Ngày</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label small fw-semibold text-secondary mb-1">
+                            <i class="fa-solid fa-calendar-day me-1"></i> Ngày Áp Dụng
+                        </label>
+                        <input type="date" id="filterBgNgayApDung" class="form-control form-control-sm shadow-sm" onchange="filterBangGias()">
+                    </div>
+
+                    <div class="col-md-1 d-flex align-items-end">
+                        <button class="btn btn-sm btn-outline-secondary w-100 rounded-pill mt-3 py-1.5" onclick="resetFilterBangGia()" title="Xóa bộ lọc">
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive border shadow-sm">
+                <table class="table custom-table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Bãi Đỗ Xe</th>
+                            <th>Loại Xe Áp Dụng</th>
+                            <th>Mức Giá Dịch Vụ</th>
+                            <th>Hình Thức Tính Phí</th>
+                            <th>Ngày Áp Dụng</th>
+                            <th class="text-center">Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bangGiaTable">
+                        <tr><td colspan="6" class="text-center text-muted py-4">Đang tải bảng giá dịch vụ...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL THIẾT LẬP BẢNG GIÁ DỊCH VỤ (THÊM MỚI) -->
+    <div class="modal fade" id="addBangGiaModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header text-white" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-tags me-2"></i>Thiết Lập Biểu Phí Dịch Vụ</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form onsubmit="handleCreateBangGia(event)">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small text-secondary">Bãi Đỗ Xe Áp Dụng (*)</label>
+                            <select id="mbgBaiXeSelect" class="form-select shadow-sm" required></select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small text-secondary">Loại Xe Áp Dụng (*)</label>
+                            <select id="mbgLoaiXeSelect" class="form-select shadow-sm" required></select>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-7">
+                                <label class="form-label fw-semibold small text-secondary">Đơn Giá (*)</label>
+                                <div class="input-group shadow-sm">
+                                    <input type="number" id="mbgDonGia" class="form-control" placeholder="5000" min="0" step="500" required>
+                                    <span class="input-group-text bg-light fw-bold text-secondary">VND</span>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label fw-semibold small text-secondary">Hình Thức Tính</label>
+                                <select id="mbgHinhThuc" class="form-select shadow-sm" required>
+                                    <option value="Luot">Theo Lượt</option>
+                                    <option value="Gio">Theo Giờ</option>
+                                    <option value="Ngay">Theo Ngày</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-4 pt-2 border-top">
+                            <button type="button" class="btn btn-light border px-4 rounded-pill" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-success fw-semibold px-4 rounded-pill shadow-sm"><i class="fa-solid fa-check me-1"></i> Áp Dụng Biểu Phí</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CHỈNH SỬA BIỂU PHÍ DỊCH VỤ -->
+    <div class="modal fade" id="editBangGiaModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header text-white" style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh Sửa Biểu Phí Dịch Vụ</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form onsubmit="handleUpdateBangGia(event)">
+                        <input type="hidden" id="ebgBangGiaId">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small text-secondary">Bãi Đỗ Xe Áp Dụng (*)</label>
+                            <select id="ebgBaiXeSelect" class="form-select shadow-sm" required></select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small text-secondary">Loại Xe Áp Dụng (*)</label>
+                            <select id="ebgLoaiXeSelect" class="form-select shadow-sm" required></select>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-7">
+                                <label class="form-label fw-semibold small text-secondary">Đơn Giá (*)</label>
+                                <div class="input-group shadow-sm">
+                                    <input type="number" id="ebgDonGia" class="form-control" placeholder="5000" min="0" step="500" required>
+                                    <span class="input-group-text bg-light fw-bold text-secondary">VND</span>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label fw-semibold small text-secondary">Hình Thức Tính</label>
+                                <select id="ebgHinhThuc" class="form-select shadow-sm" required>
+                                    <option value="Luot">Theo Lượt</option>
+                                    <option value="Gio">Theo Giờ</option>
+                                    <option value="Ngay">Theo Ngày</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small text-secondary">Ngày Bắt Đầu Áp Dụng</label>
+                            <input type="date" id="ebgNgayApDung" class="form-control shadow-sm" required>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-4 pt-2 border-top">
+                            <button type="button" class="btn btn-light border px-4 rounded-pill" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary fw-semibold px-4 rounded-pill shadow-sm">
+                                <i class="fa-solid fa-floppy-disk me-1"></i> Cập Nhật Biểu Phí
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/core/api.js"></script>
+    <script src="../js/core/auth.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/pages/tariffs.js"></script>
+</body>
+</html>

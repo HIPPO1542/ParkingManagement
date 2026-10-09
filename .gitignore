@@ -1,0 +1,15 @@
+# Visual Studio / VS Code
+.vs/
+.vscode/*
+!.vscode/settings.json
+*.user
+*.suo
+
+# Build results (quan trọng)
+[Bb]in/
+[Oo]bj/
+
+# Database cục bộ
+Database/*.db
+Database/*.db-shm
+Database/*.db-wal
