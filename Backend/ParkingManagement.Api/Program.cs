@@ -1,18 +1,19 @@
 using System.Reflection;
 using Microsoft.OpenApi.Models;
+using ParkingManagement.Api.Endpoints;
 using ParkingManagement.Api.Extensions;
 using ParkingManagement.Api.Middlewares;
+using ParkingManagement.Application;
 using ParkingManagement.Infrastructure;
 using ParkingManagement.Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Configure Controllers
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
-    });
+// 1. Configure JSON Options for Minimal APIs
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+});
 
 // 2. Configure Swagger / OpenAPI
 builder.Services.AddEndpointsApiExplorer();
@@ -65,7 +66,9 @@ builder.Services.AddSwaggerGen(c =>
 
 // 3. Register Architecture Layers
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddApplication();
 builder.Services.AddApplicationServices();
+builder.Services.AddEndpoints(typeof(Program).Assembly);
 
 // 3.1 Configure Authentication & JWT Bearer
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "SuperSecretKeyForParkingSystem_1234567890!@#$%^&*()";
@@ -120,7 +123,7 @@ if (!app.Environment.IsDevelopment())
 }
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapControllers();
+app.MapEndpoints();
 
 // 7. Initialize Database and Seed Data
 using (var scope = app.Services.CreateScope())
