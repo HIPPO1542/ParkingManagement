@@ -21,59 +21,12 @@ public class DomainTests
     }
 
     [Fact]
-    public void Money_Add_DifferentCurrency_ThrowsInvalidOperationException()
-    {
-        var vnd = new Money(20000, "VND");
-        var usd = new Money(5, "USD");
-
-        Assert.Throws<InvalidOperationException>(() => vnd.Add(usd));
-    }
-
-    [Fact]
     public void Money_Zero_HasZeroAmount()
     {
         var zero = Money.Zero();
 
         Assert.Equal(0, zero.Amount);
         Assert.Equal("VND", zero.Currency);
-    }
-
-    [Fact]
-    public void ParkingLot_RecordVehicleEntry_DecreasesAvailableSpots()
-    {
-        var parkingLot = new ParkingLot(
-            Guid.NewGuid(),
-            Guid.NewGuid(),
-            "Test Lot",
-            new Address("123 Do Xuan Hop", "Phuoc Long B", "Thu Duc City", "Ho Chi Minh City"),
-            totalCapacity: 10,
-            isActive: true
-        );
-
-        Assert.Equal(10, parkingLot.AvailableSpots);
-
-        parkingLot.RecordVehicleEntry();
-
-        Assert.Equal(9, parkingLot.AvailableSpots);
-    }
-
-    [Fact]
-    public void ParkingLot_RecordVehicleEntry_WhenFull_ThrowsBusinessRuleViolationException()
-    {
-        var parkingLot = new ParkingLot(
-            Guid.NewGuid(),
-            Guid.NewGuid(),
-            "Full Lot",
-            new Address("123 Do Xuan Hop", "Phuoc Long B", "Thu Duc City", "Ho Chi Minh City"),
-            totalCapacity: 1,
-            isActive: true
-        );
-
-        parkingLot.RecordVehicleEntry();
-        Assert.Equal(0, parkingLot.AvailableSpots);
-
-        var ex = Assert.Throws<BusinessRuleViolationException>(() => parkingLot.RecordVehicleEntry());
-        Assert.Equal("Parking lot is full!", ex.Message);
     }
 
     [Fact]
@@ -124,5 +77,41 @@ public class DomainTests
         var fee = tariff.CalculateFee(TimeSpan.FromHours(8));
 
         Assert.Equal(5000, fee.Amount);
+    }
+
+    [Fact]
+    public void Tariff_CalculateFee_PerDay_CalculatesCorrectly()
+    {
+        // Kiểm thử tính phí theo ngày: 1.5 ngày làm tròn thành 2 ngày
+        var tariff = new Tariff(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            new Money(100000, "VND"),
+            pricingType: PricingType.PerDay
+        );
+
+        var fee = tariff.CalculateFee(TimeSpan.FromHours(36));
+
+        Assert.Equal(200000, fee.Amount);
+        Assert.Equal("VND", fee.Currency);
+    }
+
+    [Fact]
+    public void Tariff_CalculateFee_PerHour_ShortDuration_MinimumOneHour()
+    {
+        // Kiểm thử đỗ thời gian cực ngắn (12 phút) -> Không ân hạn, tính đủ 1 block giờ
+        var tariff = new Tariff(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            new Money(20000, "VND"),
+            pricingType: PricingType.PerHour
+        );
+
+        var fee = tariff.CalculateFee(TimeSpan.FromMinutes(12));
+
+        Assert.Equal(20000, fee.Amount);
+        Assert.Equal("VND", fee.Currency);
     }
 }

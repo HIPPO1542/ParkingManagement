@@ -13,3 +13,6 @@
 Database/*.db
 Database/*.db-shm
 Database/*.db-wal
+
+# Test results
+[Tt]est[Rr]esults/
