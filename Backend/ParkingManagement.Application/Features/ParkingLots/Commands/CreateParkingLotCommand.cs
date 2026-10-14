@@ -33,6 +33,10 @@ public class CreateParkingLotCommandHandler : IRequestHandler<CreateParkingLotCo
         if (op == null)
             throw new EntityNotFoundException("Business operator", dto.BusinessOperatorId);
 
+        var existingLots = await _parkingLotRepository.GetAllAsync(operatorId: dto.BusinessOperatorId, ct: cancellationToken);
+        if (existingLots.Any(l => string.Equals(l.Name, dto.Name.Trim(), StringComparison.OrdinalIgnoreCase)))
+            throw new BusinessRuleViolationException($"A parking lot with the name '{dto.Name}' already exists for this business operator.");
+
         var address = new Address(
             dto.Address.Street,
             dto.Address.Ward,

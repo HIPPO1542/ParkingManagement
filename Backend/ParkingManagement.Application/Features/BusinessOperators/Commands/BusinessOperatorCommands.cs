@@ -58,6 +58,14 @@ public class CreateBusinessOperatorCommandHandler : IRequestHandler<CreateBusine
             ? dto.Password.Trim()
             : "123@456";
 
+        var existingByUsername = await _operatorRepository.GetByUsernameAsync(username, cancellationToken);
+        if (existingByUsername != null)
+            throw new BusinessRuleViolationException($"An operator with username '{username}' already exists.");
+
+        var allOps = await _operatorRepository.GetAllAsync(cancellationToken);
+        if (allOps.Any(o => string.Equals(o.Name, dto.Name.Trim(), StringComparison.OrdinalIgnoreCase)))
+            throw new BusinessRuleViolationException($"A business operator with the name '{dto.Name}' already exists.");
+
         var op = new BusinessOperator(
             Guid.NewGuid(),
             dto.SystemManagerId,
