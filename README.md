@@ -1,130 +1,154 @@
-# HỆ THỐNG QUẢN LÝ BÃI ĐỖ XE (SMART PARKING SYSTEM)
+# HỆ THỐNG QUẢN LÝ BÃI ĐỖ XE THÔNG MINH (SMART PARKING SYSTEM)
 
-Hệ thống Web API và ứng dụng quản lý bãi đỗ xe thông minh theo chuẩn **Domain-Driven Design (DDD)** và **Clean Architecture (Onion Architecture)**, xây dựng trên nền tảng **.NET 9 / C#**, cơ sở dữ liệu **SQLite** với **Entity Framework Core**.
+Hệ thống Web API và ứng dụng quản lý bãi đỗ xe thông minh xây dựng trên nền tảng **.NET 9 (C#)**, áp dụng các kiến trúc và mẫu thiết kế tiên tiến:
+- **Clean Architecture (Onion Architecture)** phân tách 4 tầng độc lập.
+- **Domain-Driven Design (DDD)** với các Aggregate Roots, Entities và Value Objects.
+- **CQRS (Command Query Responsibility Segregation)** kết hợp **MediatR**.
+- **REPR Pattern (Request-Endpoint-Response)** với **ASP.NET Core Minimal APIs**.
+- Cơ sở dữ liệu **SQLite** quản lý bởi **Entity Framework Core**, kiểm soát tương tranh lạc quan (Optimistic Concurrency).
+- Bộ kiểm thử tự động toàn diện **xUnit** với **55 ca kiểm thử đạt tỷ lệ Pass 100%**.
 
 ---
 
-## 1. CẤU TRÚC THƯ MỤC DỰ ÁN
-
-Hệ thống được chuẩn hóa theo cấu trúc quản lý trực quan:
+## 1. CẤU TRÚC DỰ ÁN (PROJECT STRUCTURE)
 
 ```
 QL_BaiXe/
+├── .vscode/                                      # Cấu hình IDE VS Code (Tasks, Launch Debugger)
 │
-├── .vscode/                             # Cấu hình phát triển trên Visual Studio Code
-│   ├── launch.json                      # Cấu hình F5 Debug Web API (.NET Core)
-│   └── tasks.json                       # Cấu hình lệnh build và test tự động
+├── Backend/                                      # MÃ NGUỒN HỆ THỐNG BACKEND (.NET 9)
+│   ├── ParkingManagement.sln                    # Solution chính
+│   │
+│   ├── ParkingManagement.Domain/                 # [TẦNG 1] DOMAIN LAYER (Cốt lõi nghiệp vụ)
+│   │   ├── Common/                               # IAggregateRoot, Entity base
+│   │   ├── Entities/                             # Aggregate Roots (ParkingLot, BusinessOperator, ParkingSession, Tariff, VehicleType, SystemManager)
+│   │   ├── Enums/                                # TariffType (PerHour, PerTurn, PerDay), SessionStatus
+│   │   ├── Exceptions/                           # BusinessRuleViolationException, DomainException
+│   │   ├── Repositories/                         # Repository Interfaces & IUnitOfWork
+│   │   └── ValueObjects/                         # Value Objects bất biến (LicensePlate, Money, Address, ContactInfo)
+│   │
+│   ├── ParkingManagement.Application/            # [TẦNG 2] APPLICATION LAYER (Use Cases & CQRS)
+│   │   ├── Common/                               # ApiResponse<T>, PagedResult<T>
+│   │   ├── DTOs/                                 # Data Transfer Objects
+│   │   ├── Features/                             # CQRS Features tổ chức theo từng Aggregate:
+│   │   │   ├── Auth/                             # LoginCommand, GetCurrentUserProfileQuery
+│   │   │   ├── BusinessOperators/                # Create, Update, Delete Operator (Commands/Queries)
+│   │   │   ├── ParkingLots/                      # Create, Update, Delete Lot, GetLotById, GetLots (Commands/Queries)
+│   │   │   ├── ParkingSessions/                  # CheckInCommand, CheckOutByIdCommand, CheckOutByPlateCommand, Queries
+│   │   │   ├── Reports/                          # GetActivityReportQuery (Thống kê hoạt động, doanh thu)
+│   │   │   ├── Tariffs/                          # Create, Update, Delete, GetTariffs (Commands/Queries)
+│   │   │   └── VehicleTypes/                     # Create, GetAllVehicleTypes (Commands/Queries)
+│   │   └── Services/                             # Token & Application Interfaces
+│   │
+│   ├── ParkingManagement.Infrastructure/         # [TẦNG 3] INFRASTRUCTURE LAYER (Hạ tầng kỹ thuật)
+│   │   ├── Data/                                 # ParkingDbContext, DataSeeder (tự động nạp dữ liệu mẫu ban đầu)
+│   │   ├── EntityConfigs/                        # EF Core Fluent API Configurations (Quan hệ, Indexes, Value Objects OwnsOne)
+│   │   ├── Repositories/                         # Cài đặt thực tế Repository và UnitOfWork
+│   │   └── Services/                             # JwtTokenGenerator, PasswordHasher
+│   │
+│   ├── ParkingManagement.Api/                    # [TẦNG 4] PRESENTATION LAYER (Minimal APIs)
+│   │   ├── Endpoints/                            # Các Endpoint REPR độc lập:
+│   │   │   ├── AuthEndpoints.cs                  # /api/auth (Login, Me)
+│   │   │   ├── BusinessOperatorEndpoints.cs      # /api/business-operators
+│   │   │   ├── ParkingLotEndpoints.cs            # /api/parking-lots
+│   │   │   ├── ParkingSessionEndpoints.cs        # /api/parking-sessions (Check-in, Check-out)
+│   │   │   ├── ReportEndpoints.cs                # /api/reports/activity
+│   │   │   ├── TariffEndpoints.cs                # /api/tariffs
+│   │   │   └── VehicleTypeEndpoints.cs           # /api/vehicle-types
+│   │   ├── Middlewares/                          # GlobalExceptionMiddleware (Chuẩn hóa lỗi tiếng Việt)
+│   │   └── Program.cs                            # Khởi tạo DI, Swagger UI, Middleware pipeline
+│   │
+│   └── ParkingManagement.Tests/                  # DỰ ÁN KIỂM THỬ TỰ ĐỘNG (55 TESTS - PASS 100%)
+│       ├── AuthServiceTests.cs                   # Kiểm thử xác thực, phân quyền JWT, mã hóa mật khẩu
+│       ├── BoundaryValueAnalysisTests.cs         # Phân tích giá trị biên 6 điểm (BVA) cho Dung lượng, Biển số, Tiền tệ
+│       ├── BusinessUseCasesTests.cs              # Kiểm thử Use Cases, Soft/Hard Delete, Quyền sở hữu (Ownership), Báo cáo
+│       ├── ConcurrencyAndIntegrityTests.cs       # Kiểm thử đối kháng (Race Condition 2 xe cùng vào), Rollback giao dịch
+│       └── DomainTests.cs                        # Kiểm thử Entity Invariants và Công thức tính phí (Tariff Engine)
 │
-├── Backend/                             # TOÀN BỘ MÃ NGUỒN BACKEND (DDD 4 TẦNG)
-│   ├── QL_BaiXe.slnx                    # Solution file
-│   │
-│   ├── QL_BaiXe.Domain/                 # [TẦNG 1] DOMAIN LAYER
-│   │   ├── Common/                      # Marker Interface (IAggregateRoot)
-│   │   ├── Exceptions/                  # Domain Exceptions (BusinessRuleViolationException, ...)
-│   │   ├── ValueObjects/                # Value Objects (DiaChi, BienSoXe, TienTe, ThongTinLienHe)
-│   │   ├── Entities/                    # Aggregate Roots (BaiDoXe, DonViKinhDoanh, NhanVienQuanLy, LuotRaVao, BangGiaDichVu, LoaiXe)
-│   │   └── Repositories/                # Repository Interfaces & IUnitOfWork
-│   │
-│   ├── QL_BaiXe.Application/            # [TẦNG 2] APPLICATION LAYER
-│   │   ├── Common/                      # ApiResponse<T>, PagedResult<T>
-│   │   ├── DTOs/                        # DTOs & Validation dữ liệu đầu vào
-│   │   └── Services/                    # Application Use Cases (BaiDoXe, DonVi, LuotRaVao, ThongKe)
-│   │
-│   ├── QL_BaiXe.Infrastructure/         # [TẦNG 3] INFRASTRUCTURE LAYER
-│   │   ├── Data/
-│   │   │   ├── ParkingDbContext.cs      # EF Core Fluent API map chuẩn bảng/cột theo ERD
-│   │   │   └── DataSeeder.cs            # Tự động tạo và nạp dữ liệu mẫu
-│   │   └── Repositories/                # Cài đặt Repositories & UnitOfWork thực tế
-│   │
-│   ├── QL_BaiXe.Api/                    # [TẦNG 4] PRESENTATION LAYER (WEB API)
-│   │   ├── Controllers/                 # RESTful Controllers
-│   │   ├── Middlewares/                 # GlobalExceptionMiddleware xử lý lỗi tiếng Việt
-│   │   ├── appsettings.json             # Cấu hình kết nối SQLite
-│   │   └── Program.cs                   # Cấu hình Swagger UI, DI, Auto-migration
-│   │
-│   └── QL_BaiXe.Tests/                  # KIỂM THỬ TỰ ĐỘNG (XUNIT & EF CORE SQLITE)
-│       ├── DomainTests.cs               # Kiểm thử Value Objects & Entity behaviors
-│       └── BusinessUseCasesTests.cs     # Kiểm thử toàn diện 100% Sequence Diagrams
+├── Database/                                     # DỮ LIỆU & SCRIPT KHỞI TẠO SQL
+│   ├── init_schema.sql                           # Script DDL SQLite chuẩn
+│   ├── parking.db                                # File cơ sở dữ liệu SQLite cục bộ
+│   └── seed_parking_lots.sql                     # Script nạp danh mục mẫu
 │
-├── Database/                            # LƯU TRỮ VÀ KHỞI TẠO CƠ SỞ DỮ LIỆU
-│   ├── init_schema.sql                  # Script SQL DDL tạo các bảng SQLite chuẩn theo ERD
-│   └── parking.db                       # File SQLite database sẵn có dữ liệu mẫu
+├── Frontend/                                     # GIAO DIỆN QUẢN TRỊ TRỰC QUAN (SPA)
+│   ├── html/                                     # Các trang quản trị (checkin.html, dashboard.html, parking-lots.html...)
+│   ├── js/                                       # Logic tương tác REST API (auth.js, checkin.js, api.js...)
+│   └── index.html                                # Trang điều hướng trung tâm
 │
-├── Frontend/                            # ỨNG DỤNG GIAO DIỆN TRỰC QUAN (WEB DASHBOARD)
-│   └── index.html                       # Giao diện SPA (Bootstrap 5, FontAwesome) tương tác trực tiếp với API
-│
-└── README.md                            # Tài liệu hướng dẫn sử dụng và kiểm thử
+├── TaskAPISpec.md                                # TÀI LIỆU ĐẶC TẢ CHI TIẾT API V2.0
+├── UnitTestPlan.md                               # KẾ HOẠCH KIỂM THỬ TỔNG THỂ (MASTER TEST PLAN)
+├── TestCases.md                                  # BÁO CÁO KẾT QUẢ 55 CA KIỂM THỬ (10 CỘT CHUẨN QA)
+├── TestCases.csv                                 # DỮ LIỆU TEST CASES ĐỊNH DẠNG EXCEL (UTF-8 BOM)
+├── DemoScript.md                                 # KỊCH BẢN THỰC THI & PHẢN BIỆN REVIEW
+└── README.md                                     # Tài liệu tổng quan hệ thống
 ```
 
 ---
 
-## 2. ÁNH XẠ MÔ HÌNH DỮ LIỆU (ERD) VÀ VALUE OBJECTS
+## 2. QUY TẮC NGHIỆP VỤ CỐT LÕI (CORE BUSINESS RULES)
 
-Ánh xạ chi tiết qua EF Core Fluent API:
+### 2.1. Động cơ tính phí gửi xe (Tariff Engine)
+* **Theo lượt (`PerTurn`)**: Thu một mức phí cố định khi xe ra bãi, không phụ thuộc vào thời gian đỗ (áp dụng cho xe máy).
+* **Theo giờ (`PerHour`)**: Thu theo block giờ, không áp dụng ân hạn miễn phí:
+  * Vào bãi và ra ngay (dưới 1 giờ, ví dụ 5 phút, 12 phút): Thu tròn tối thiểu **1 block giờ đầu tiên** (`hours = 1`).
+  * Từ giờ thứ hai trở đi: Số phút lẻ được làm tròn lên block giờ kế tiếp (`Math.Ceiling`).
+* **Theo ngày (`PerDay`)**: Tính theo block 24 giờ, vượt quá 24h làm tròn sang ngày tiếp theo (ví dụ 36 giờ đỗ tính 2 ngày).
 
-| Bảng Cơ Sở Dữ Liệu | Khóa Chính | Value Objects được ánh xạ (`OwnsOne`) | Cột Dữ Liệu Chính |
-| :--- | :--- | :--- | :--- |
-| `NHAN_VIEN_QUAN_LY` | `ma_nhan_vien` | `ThongTinLienHe` -> `so_dien_thoai`, `email` | `ho_ten`, `chuc_vu`, `ten_dang_nhap`, `mat_khau_hash`, `trang_thai_hoat_dong` |
-| `DON_VI_KINH_DOANH` | `ma_don_vi` | `DiaChi` -> 4 cột địa chỉ<br/>`ThongTinLienHe` -> `so_dien_thoai`, `email` | `ma_nhan_vien_ql` (FK), `ten_don_vi`, `nguoi_dai_dien`, `trang_thai_hoat_dong` |
-| `BAI_DO_XE` | `ma_bai` | `DiaChi` -> `dia_chi_so_nha`, `dia_chi_phuong_xa`, `dia_chi_quan_huyen`, `dia_chi_tinh_thanh` | `ma_don_vi` (FK), `ten_bai`, `tong_suc_chua`, `so_cho_trong`, `gio_mo_cua`, `gio_dong_cua`, `dang_hoat_dong` |
-| `LOAI_XE` | `ma_loai_xe` | - | `ten_loai_xe`, `mo_ta` |
-| `GIA_VE_BAI_XE` | `ma_gia_ve` | `TienTe` -> `muc_gia`, `don_vi_tien` | `ma_bai` (FK), `ma_loai_xe` (FK), `hinh_thuc_tinh`, `ngay_ap_dung` |
-| `LUOT_RA_VAO` | `ma_luot` | `BienSoXe` -> `bien_so_ma_tinh`, `bien_so_xe`<br/>`TienTe` -> `so_tien_thu`, `don_vi_tien` | `ma_bai` (FK), `ma_loai_xe` (FK), `thoi_gian_vao`, `thoi_gian_ra`, `trang_thai` |
+### 2.2. Chính sách xóa bãi xe (Soft Delete vs Hard Delete)
+* **Xóa cứng (Hard Delete - `204 No Content`)**: Chỉ áp dụng khi bãi xe **chưa từng phát sinh bất kỳ lượt gửi xe nào** trong lịch sử (`HistoricalSessions == 0`).
+* **Xóa mềm (Soft Delete - `200 OK`)**: Khi bãi xe đã có lịch sử gửi xe trong quá khứ nhưng hiện tại không còn xe nào đang đỗ (`CurrentParked == 0`), hệ thống chuyển cờ `IsDeleted = true` và `IsActive = false` để bảo toàn lịch sử kế toán, doanh thu và tính toàn vẹn khóa ngoại.
+* **Chặn xóa**: Nếu bãi xe đang có xe đỗ (`CurrentParked > 0`), hệ thống từ chối xóa và ném `BusinessRuleViolationException`.
+
+### 2.3. Kiểm soát tương tranh & Toàn vẹn dữ liệu (Concurrency Control)
+* Khi bãi chỉ còn đúng 1 chỗ trống (`AvailableSpots = 1`) và có 2 request quét thẻ cùng một tích tắc:
+  * Cơ chế Database Transaction và Optimistic Concurrency Control (`RowVersion`) đảm bảo chỉ 1 xe thành công (chỗ trống về 0), xe thứ hai nhận lỗi thông báo bãi đã đầy. Chỗ trống không bao giờ bị âm.
+* Khi có ngoại lệ xảy ra trong quá trình check-in, giao dịch tự động Rollback, không để lại bản ghi mồ côi (No orphan session).
+
+### 2.4. Phân quyền và Bảo vệ tài nguyên (RBAC & Ownership Check)
+* Hệ thống xác thực bằng **JWT Token** phân quyền 3 vai trò: `SystemManager`, `BusinessOperator`, `Attendant`.
+* Phía máy chủ kiểm tra quyền sở hữu tài nguyên: Nhà điều hành (Business Operator) chỉ được sửa/xóa các bãi xe do chính mình sở hữu. Thao tác trên bãi của người khác sẽ bị từ chối ngay lập tức với mã lỗi **`403 Forbidden`**.
 
 ---
 
-## 3. CÁC QUY TẮC NGHIỆP VỤ & SEQUENCE DIAGRAMS
+## 3. HỆ THỐNG TÀI LIỆU KIỂM THỬ & ĐẶC TẢ
 
-1. **Xóa Bãi Đỗ Xe (`xoaBaiDoXe`)**:
-   - Query: `SELECT COUNT(*) FROM LUOT_RA_VAO WHERE ma_bai = ? AND trang_thai = 'Dang_gui'`.
-   - Nếu `soXeDangGui > 0`: Ném `BusinessRuleViolationException`: *"Bãi xe còn xe đang gửi, không thể xóa!"*.
-   - Nếu `soXeDangGui == 0`: Xóa bãi đỗ xe thành công.
-
-2. **Xóa Đơn Vị Kinh Doanh (`xoaDonViKinhDoanh`)**:
-   - Query: `SELECT COUNT(*) FROM BAI_DO_XE WHERE ma_don_vi = ? AND dang_hoat_dong = 1`.
-   - Nếu `soBaiHoatDong > 0`: Ném `BusinessRuleViolationException`: *"Đơn vị đang quản lý bãi xe hoạt động, không thể xóa!"*.
-   - Nếu `soBaiHoatDong == 0`: Xóa đơn vị kinh doanh thành công.
-
-3. **Báo Cáo Thống Kê (`xemBaoCaoHoatDong`)**:
-   - Endpoint: `GET /api/thong-ke/hoat-dong?maBai={guid}&tuNgay={date}&denNgay={date}`
-   - Validate thời gian: Nếu `tuNgay > denNgay` hoặc thời gian ở tương lai -> Báo lỗi: *"Khoảng thời gian không hợp lệ!"*.
-   - Nếu không có dữ liệu -> Trả về thông báo: *"Không có dữ liệu hợp lệ"*.
-   - Nếu có dữ liệu -> Tổng hợp: Tổng lượt vào, tổng lượt ra, số xe đang gửi, chỗ trống hiện tại, tổng doanh thu, tình trạng hoạt động của bãi.
-
-4. **Check-in & Check-out**:
-   - Check-in: Kiểm tra xe trong bãi, kiểm tra bãi còn chỗ, giảm `so_cho_trong`, tạo lượt xe trạng thái `Dang_gui`.
-   - Check-out: Tính thời gian gửi, tính tiền theo bảng giá `BangGiaDichVu` (theo Lượt hoặc Giờ), cập nhật trạng thái `Da_ra`, tăng lại `so_cho_trong`.
+Hệ thống được trang bị bộ tài liệu kỹ thuật hoàn chỉnh:
+1. **[TaskAPISpec.md](TaskAPISpec.md)**: Đặc tả chi tiết 15 endpoints RESTful, mô tả Request/Response JSON, mã HTTP, luật kiểm tra phân quyền và bảng Changelog v2.0.
+2. **[UnitTestPlan.md](UnitTestPlan.md)**: Kế hoạch kiểm thử tổng thể, chiến lược phân tích giá trị biên (BVA 6 điểm biên), phân vùng tương đương (EP), ma trận truy xuất nguồn gốc (Traceability Matrix).
+3. **[TestCases.md](TestCases.md)**: Bảng đặc tả chi tiết **55 test cases** theo định dạng 10 cột chuẩn QA/QC quốc tế, kèm nhật ký thực thi thực tế đạt **100% Pass**.
+4. **[TestCases.csv](TestCases.csv)**: File dữ liệu test cases chuẩn mã hóa UTF-8 BOM, hỗ trợ mở trực tiếp trên Microsoft Excel.
+5. **[DemoScript.md](DemoScript.md)**: Kịch bản demo 5 bước và bộ câu hỏi phản biện chuyên sâu khi nghiệm thu dự án.
 
 ---
 
 ## 4. HƯỚNG DẪN KHỞI CHẠY VÀ KIỂM THỬ
 
-### 1. Khởi chạy Backend Web API
-Mở terminal tại thư mục gốc hoặc thư mục `Backend/`, chạy lệnh:
+### 4.1. Chạy toàn bộ 55 Unit Tests tự động
+Mở Terminal tại thư mục gốc của dự án và chạy lệnh:
 ```powershell
-cd Backend
-dotnet run --project QL_BaiXe.Api/QL_BaiXe.Api.csproj
+dotnet test Backend/ParkingManagement.sln
 ```
-*(Chương trình tự động tạo file SQLite `parking.db` và nạp sẵn dữ liệu mẫu thực tế).*
-
-### 2. Kiểm thử API trên Swagger UI
-Mở trình duyệt:
-```
-http://localhost:5000/
-hoặc
-http://localhost:5097/
-```
-
-### 3. Trải nghiệm Giao diện Quản lý (Frontend)
-Mở trực tiếp file `Frontend/index.html` bằng trình duyệt (hoặc dùng Live Server trong VS Code). Giao diện cho phép:
-- Tra cứu báo cáo hoạt động bãi xe theo thời gian thực (Biểu đồ / Chỉ số doanh thu, lượt vào, lượt ra).
-- Thao tác Check-in xe vào bãi và Check-out in biên lai thu tiền trực tiếp.
-- Xem danh sách và thực hiện xóa bãi đỗ xe (áp dụng luật chặn xóa khi còn xe).
-- Xem danh sách và thực hiện xóa đơn vị kinh doanh (áp dụng luật chặn xóa khi còn bãi hoạt động).
-
-### 4. Chạy toàn bộ Unit & Integration Tests
+*Để xem chi tiết danh sách từng hàm test chạy thành công:*
 ```powershell
-cd Backend
-dotnet test
+dotnet test Backend/ParkingManagement.sln -v n
 ```
-**Kết quả**: 15/15 tests **Passed** 100%.
+
+**Kết quả kiểm thử chính thức:**
+```text
+Test Run Successful.
+Total tests: 55
+     Passed: 55 (100%)
+     Failed: 0
+    Skipped: 0
+ Total time: 1.0 giây
+```
+
+### 4.2. Khởi chạy Web API Backend
+```powershell
+dotnet run --project Backend/ParkingManagement.Api/ParkingManagement.Api.csproj
+```
+Truy cập tài liệu tương tác Swagger UI:
+* **`http://localhost:5000/swagger`** hoặc **`http://localhost:5097/swagger`**
+
+### 4.3. Mở giao diện Quản trị (Frontend)
+Mở trực tiếp file `Frontend/index.html` trên trình duyệt để trải nghiệm hệ thống quản lý bãi đỗ xe trực quan.
