@@ -152,3 +152,31 @@ Truy cập tài liệu tương tác Swagger UI:
 
 ### 4.3. Mở giao diện Quản trị (Frontend)
 Mở trực tiếp file `Frontend/index.html` trên trình duyệt để trải nghiệm hệ thống quản lý bãi đỗ xe trực quan.
+
+---
+
+## 5. QUY CHUẨN ĐÓNG GÓP & GIT WORKFLOW (GIT FLOW CONVENTION)
+
+### 5.1. Quy tắc phân nhánh (Branching Convention)
+* **Các nhánh tách từ `dev`:**
+  * `feats/[Name]`: Phát triển chức năng mới (kèm Unit Test và tài liệu tương ứng).
+  * `fix_bug/[Name]`: Sửa lỗi trong quá trình phát triển và kiểm thử nội bộ.
+  * `refactor/[Name]`: Tối ưu hóa kiến trúc, tái cấu trúc mã nguồn hoặc bổ sung bộ kiểm thử nghiệm thu.
+* **Nhánh tách từ `master`:**
+  * `hot_fix/[Name]`: Vá lỗi khẩn cấp trực tiếp trên môi trường Production.
+
+### 5.2. Quy chuẩn thông điệp Commit (Commit Convention)
+Cấu trúc bắt buộc: `[add/update/fix/format]: [Content]`
+* `[add]`: Thêm mới hoàn toàn file, chức năng, bảng dữ liệu hoặc tài liệu test.
+* `[update]`: Cập nhật, nâng cấp, bổ sung mã nguồn, tài liệu hoặc cấu hình đã có.
+* `[fix]`: Vá lỗi bug, sửa logic tính toán sai, khắc phục ngoại lệ.
+* `[format]`: Căn chỉnh lề, định dạng mã nguồn hoặc văn bản (không đụng vào logic).
+
+### 5.3. Chu trình phát hành & Hợp nhất (Release Pipeline)
+* **Luồng phát hành chuẩn:** `dev` ➔ `v1-release` ➔ `master` ➔ `tag`
+* **Quy trình:**
+  1. Đóng băng mã nguồn từ `dev` sang nhánh release (`v1-release`).
+  2. Tổng duyệt QA, kiểm thử nghiệm thu toàn diện (`dotnet test`).
+  3. Hợp nhất vào `master` và đóng dấu phiên bản (Annotated Tag, ví dụ `v1.0.0`).
+  4. Xóa nhánh release tạm thời sau khi hoàn tất đóng dấu tag.
+
