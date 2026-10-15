@@ -83,7 +83,7 @@ public class ParkingLotEndpoints : IEndpoint
                 var currentLot = await sender.Send(new GetParkingLotByIdQuery(id));
                 if (currentLot.BusinessOperatorId != userOperatorId)
                 {
-                    return Results.Json(ApiResponse<object>.Fail("Business operators can only update their own parking lots."), statusCode: StatusCodes.Status403Forbidden);
+                    return Results.Json(ApiResponse<object>.Fail("Business operators can only update their own parking lots.", StatusCodes.Status403Forbidden), statusCode: StatusCodes.Status403Forbidden);
                 }
             }
 
@@ -99,7 +99,7 @@ public class ParkingLotEndpoints : IEndpoint
         {
             if (user.IsInRole("BusinessOperator"))
             {
-                return Results.Json(ApiResponse<object>.Fail("Business operators are not allowed to delete parking lots."), statusCode: StatusCodes.Status403Forbidden);
+                return Results.Json(ApiResponse<object>.Fail("Business operators are not allowed to delete parking lots.", StatusCodes.Status403Forbidden), statusCode: StatusCodes.Status403Forbidden);
             }
 
             await sender.Send(new DeleteParkingLotCommand(id));

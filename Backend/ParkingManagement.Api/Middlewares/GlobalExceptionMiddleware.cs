@@ -70,7 +70,7 @@ public class GlobalExceptionMiddleware
         context.Response.ContentType = "application/json; charset=utf-8";
         context.Response.StatusCode = (int)statusCode;
 
-        var response = ApiResponse<object>.Fail(message, errors);
+        var response = ApiResponse<object>.Fail(message, errors, (int)statusCode);
         var jsonOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,

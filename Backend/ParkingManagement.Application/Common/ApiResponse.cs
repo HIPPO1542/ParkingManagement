@@ -2,38 +2,53 @@ namespace ParkingManagement.Application.Common;
 
 public class ApiResponse<T>
 {
-    public bool Success { get; set; }
-    public string Message { get; set; } = string.Empty;
+    public int Code { get; set; } = 0;
+    public bool Success { get; set; } = true;
+    public string Message { get; set; } = "Success";
     public T? Data { get; set; }
     public List<string>? Errors { get; set; }
 
-    public static ApiResponse<T> SuccessResult(T data, string message = "Operation successful.")
+    public static ApiResponse<T> SuccessResult(T data, string message = "Success")
     {
         return new ApiResponse<T>
         {
+            Code = 0,
             Success = true,
             Message = message,
             Data = data
         };
     }
 
-    public static ApiResponse<T> SuccessMessage(string message = "Operation successful.")
+    public static ApiResponse<T> SuccessMessage(string message = "Success")
     {
         return new ApiResponse<T>
         {
+            Code = 0,
             Success = true,
             Message = message,
             Data = default
         };
     }
 
-    public static ApiResponse<T> Fail(string message, List<string>? errors = null)
+    public static ApiResponse<T> Fail(string message, List<string>? errors = null, int code = 400)
     {
         return new ApiResponse<T>
         {
+            Code = code,
             Success = false,
             Message = message,
             Errors = errors ?? new List<string>()
+        };
+    }
+
+    public static ApiResponse<T> Fail(string message, int code)
+    {
+        return new ApiResponse<T>
+        {
+            Code = code,
+            Success = false,
+            Message = message,
+            Errors = new List<string>()
         };
     }
 }
